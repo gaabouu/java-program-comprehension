@@ -19,6 +19,7 @@ import appInfo.ClassInfo;
 import appInfo.FileInfo;
 import appInfo.Info;
 import appInfo.MethodInfo;
+import appInfo.MethodInvocationInfo;
 import appInfo.PackageInfo;
 import visitors.MethodInvocationVisitor;
 import visitors.TypeDeclarationVisitor;
@@ -61,11 +62,13 @@ public class Utils {
 	          for (MethodDeclaration meth : type.getMethods()) {
 	            MethodInfo methodInfo = new MethodInfo();
 	            methodInfo.name = meth.getName().toString();
+	            methodInfo.cls = type.getName().toString();
 	            methodInfo.nbParameters = meth.parameters().size();
 	            methodInfo.nbLines = meth.getBody().toString().split("\n").length;
 	            for(MethodInvocation inv: MethodInvocationVisitor.perform(parser)) {
-	              //System.out.println(inv);
-	              methodInfo.calledMethods.add(inv.getName().toString());
+	            	
+	              //System.out.println("   " + inv);
+	              methodInfo.calledMethods.add(inv);
 	            }
 	            clsInfo.methods.add(methodInfo);
 	          }
@@ -135,6 +138,76 @@ public class Utils {
 	      }
 	    }
 	    return methods;
+	  }
+	  
+	  public static int getMetrik(String clsA, String clsB){
+		  int result = 0;
+		  
+		  AppInfo appInfo = Utils.app;
+		  ArrayList<MethodInfo> methsA = null;
+		  ArrayList<MethodInfo> methsB =null;
+		  System.out.println("Calcul du couplage entre " + clsA + " et " + clsB + "...");
+		  for(PackageInfo pck: appInfo.packages){
+			  for(FileInfo file: pck.files){
+				  for(ClassInfo cls: file.classes){
+					  if(cls.name.equals(clsA)){
+						  methsA = new ArrayList<MethodInfo>();
+						  methsA.addAll(cls.methods);
+					  } else if(cls.name.equals(clsB)){
+						  methsB = new ArrayList<MethodInfo>();
+						  methsB.addAll(cls.methods);
+					  }
+				  }
+			  }
+		  }
+		  if(methsA == null || methsB == null){
+			  System.err.println("Une des classes n'existe pas");
+			  return -1;
+		  }
+		  System.out.println("\nMéthodes appelées par " + clsA);
+		  for(MethodInfo meth: methsA){
+			  for(MethodInvocation methInv: meth.calledMethods){
+				  System.out.println(methInv.toString());
+			  }
+		  }
+		  System.out.println("\nMéthodes appelées par " + clsB);
+
+		  for(MethodInfo meth: methsB){
+			  for(MethodInvocation methInv: meth.calledMethods){
+				  System.out.println(methInv.toString());
+			  }
+		  }
+		  
+		  for(PackageInfo pck : appInfo.packages){
+			  for(FileInfo file: pck.files){
+				  for(ClassInfo cls: file.classes){
+					  if(cls.name.equals(clsA) || cls.name.equals(clsB)){
+						  
+					  }
+					  for(MethodInfo meth: cls.methods){
+						  //System.out.println(meth);
+						  System.out.println("  " + meth.getCls());
+						  for(MethodInvocation calledMeth: meth.calledMethods){
+							  System.out.println("     " + calledMeth.toString());
+							  String call = calledMeth.toString();
+							  String[] rec = call.split("\\.");
+							  //System.out.println(rec);
+							  if(rec.length <=1 || rec[0].equals("this"));								  
+							  else {
+								  System.out.println("        Adding 1 to result");
+								  System.out.println(calledMeth);
+								  result += 1;
+							  }
+							  
+						  }
+					  }
+				  }
+				  
+			  }
+		  }
+		  
+		  System.out.println(result);
+		  return result;
 	  }
 
 	  

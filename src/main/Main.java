@@ -37,6 +37,23 @@ public class Main {
 	    app = (AppInfo) Utils.getInfo(Utils.root);
 	    
 	    Utils.app = app;
+	    
+	    int met;
+	    boolean stop = false;
+	    Scanner sc = new Scanner(System.in);
+	    while(!stop){
+	    
+		    System.out.println("Choisissez les classes dont vous souhaitez connaitre le couplage: Classe A");
+		    String classA = sc.nextLine();
+		    System.out.println("Classe B");
+		    String classB = sc.nextLine();
+		    
+		    met = Utils.getMetrik(classA, classB);
+		    
+		    if(!(met == -1)) stop = true;
+	    }
+
+	    
 /*
 	    //1. Nombre de classes de l’application.
 	    System.out.println("Nombre de classes: " + app.getNbClasses());

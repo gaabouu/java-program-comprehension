@@ -7,7 +7,7 @@ public class AppInfo extends Info{
 
     public String toString() {
       String str = "App: " + this.name + ":\n";
-      str += "Lines: " + this.getLines() + "\n";
+      str += "Lines: " + getLines() + "\n";
       for (PackageInfo pkg : packages) {
         str += pkg.toString() + "\n";
       }

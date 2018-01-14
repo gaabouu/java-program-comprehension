@@ -2,10 +2,13 @@ package appInfo;
 
 import java.util.ArrayList;
 
+import org.eclipse.jdt.core.dom.MethodInvocation;
+
 public class MethodInfo extends Info {
 	public int nbLines;
     public int nbParameters;
-    public ArrayList<String> calledMethods = new ArrayList<>();
+    public String cls;
+    public ArrayList<MethodInvocation> calledMethods = new ArrayList<>();
 
     public String toString() {
       String str = "\t\t\t\tMethod: " + this.name + ":\n";
@@ -17,5 +20,9 @@ public class MethodInfo extends Info {
 
     public int getLines() {
       return nbLines;
+    }
+    
+    public String getCls(){
+    	return this.cls;
     }
 }
