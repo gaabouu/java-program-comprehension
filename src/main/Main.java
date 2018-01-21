@@ -38,7 +38,7 @@ public class Main {
 	    
 	    Utils.app = app;
 	    
-	    int met;
+	    double met;
 	    boolean stop = false;
 	    Scanner sc = new Scanner(System.in);
 	    while(!stop){

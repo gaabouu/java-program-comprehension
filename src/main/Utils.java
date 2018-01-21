@@ -10,9 +10,12 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import appInfo.AppInfo;
 import appInfo.ClassInfo;
@@ -23,6 +26,7 @@ import appInfo.MethodInvocationInfo;
 import appInfo.PackageInfo;
 import visitors.MethodInvocationVisitor;
 import visitors.TypeDeclarationVisitor;
+import visitors.VariableDeclarationFragmentVisitor;
 
 public class Utils {
 	protected static File root;
@@ -59,16 +63,53 @@ public class Utils {
 	        if (!(type.isInterface())) {
 	          clsInfo.name = type.getName().toString();
 	          clsInfo.nbLines = type.toString().split("\n").length;
+	          for(FieldDeclaration field: type.getFields()){
+	        	  
+	        	  	Object o = field.fragments().get(0);
+	        	  	 String name = null;
+					if(o instanceof VariableDeclarationFragment){
+						String s = ((VariableDeclarationFragment) o).getName().toString();
+						name = s;
+						//System.out.println("-------------field: " + s);
+					}
+	        	  
+	        	 
+	        	  String typeField = field.getType().toString();
+	        	//  System.out.println("UN CHAMP DE LA CLASSE " + type.getName().toString() + ": " + name + ": " + typeField);
+	        	  clsInfo.fields.put(name, typeField);
+	          }
 	          for (MethodDeclaration meth : type.getMethods()) {
 	            MethodInfo methodInfo = new MethodInfo();
 	            methodInfo.name = meth.getName().toString();
 	            methodInfo.cls = type.getName().toString();
 	            methodInfo.nbParameters = meth.parameters().size();
 	            methodInfo.nbLines = meth.getBody().toString().split("\n").length;
+	            
 	            for(MethodInvocation inv: MethodInvocationVisitor.perform(parser)) {
 	            	
 	              //System.out.println("   " + inv);
 	              methodInfo.calledMethods.add(inv);
+	            }
+	           // System.out.println("   Les variables de la méthode: " + meth.getName());
+	            for(VariableDeclarationFragment var: VariableDeclarationFragmentVisitor.perform(meth)){
+	            	
+	            	//System.out.println("       " + var.getParent());
+	            	String name = var.getName().toString();
+	            	String typeSimpleName = null;
+	            	if(var.getParent() instanceof FieldDeclaration){
+	            		FieldDeclaration decla = ((FieldDeclaration)var.getParent());
+	            		
+	            			typeSimpleName  = decla.getType().toString();
+	            			//System.out.println("UN CHAMP DE LA CLASSE: " + name + ": " + typeSimpleName);
+	            		
+	            	}else if(var.getParent() instanceof VariableDeclarationStatement){
+	            		VariableDeclarationStatement decla = ((VariableDeclarationStatement)var.getParent());
+	            		
+	            			typeSimpleName = decla.getType().toString();
+	            			methodInfo.addCouple(name, typeSimpleName);
+	            			//System.out.println("UNE VARIABLE: " + name + ": " + typeSimpleName);
+	            		
+	            	}
 	            }
 	            clsInfo.methods.add(methodInfo);
 	          }
@@ -140,12 +181,18 @@ public class Utils {
 	    return methods;
 	  }
 	  
-	  public static int getMetrik(String clsA, String clsB){
-		  int result = 0;
+	  public static double getMetrik(String clsA, String clsB){
+		  double result = 0;
 		  
 		  AppInfo appInfo = Utils.app;
 		  ArrayList<MethodInfo> methsA = null;
 		  ArrayList<MethodInfo> methsB =null;
+		  
+		  ArrayList<String> fieldsAOfTypeB = getFieldsAToB(clsA, clsB);
+		  ArrayList<String> fieldsBOfTypeA = getFieldsAToB(clsB, clsA);
+		  
+		  int sub = 0;
+		  
 		  System.out.println("Calcul du couplage entre " + clsA + " et " + clsB + "...");
 		  for(PackageInfo pck: appInfo.packages){
 			  for(FileInfo file: pck.files){
@@ -164,20 +211,59 @@ public class Utils {
 			  System.err.println("Une des classes n'existe pas");
 			  return -1;
 		  }
+		  
 		  System.out.println("\nMéthodes appelées par " + clsA);
 		  for(MethodInfo meth: methsA){
+			  ArrayList<String> varsAToB = new ArrayList<String>();
+			  varsAToB.addAll(meth.getVarsNameByType(clsB));
+			  //System.out.println("Variables de " + meth.name + " de type " + clsB);
+			  //System.out.println(varsAToB);
+			  //System.out.println("et champs: \n" + fieldsAOfTypeB);
 			  for(MethodInvocation methInv: meth.calledMethods){
-				  System.out.println(methInv.toString());
+				 // if(methInv.toString().matches(".")){
+					  String var = methInv.toString();
+					  String[] parts = var.split("\\.");
+					  var = parts[0];
+					  for(String varAB: varsAToB){
+						  if(var.equals(varAB)) sub += 1;
+					  }
+					  for(String fieldAB: fieldsAOfTypeB){
+						  if(var.equals(fieldAB)) sub += 1;
+					  }
+					  
+					  //System.out.println(var);
+				 // }else{
+					 //System.out.println(methInv.toString()); 
+				 // }
 			  }
 		  }
 		  System.out.println("\nMéthodes appelées par " + clsB);
 
 		  for(MethodInfo meth: methsB){
+			  ArrayList<String> varsBToA = new ArrayList<String>();
+			  varsBToA.addAll(meth.getVarsNameByType(clsA));
+			  //System.out.println("Variables de " + meth.name + " de type " + clsA);
+			  //System.out.println(varsBToA);
+			  //System.out.println("et champs: \n" + fieldsBOfTypeA);
 			  for(MethodInvocation methInv: meth.calledMethods){
-				  System.out.println(methInv.toString());
+				  String var = methInv.toString();
+				  String[] parts = var.split("\\.");
+				  var = parts[0];
+				  for(String varBA: varsBToA){
+					  if(var.equals(varBA)) sub += 1;
+				  }
+				  for(String fieldBA: fieldsBOfTypeA){
+					  if(var.equals(fieldBA)) sub += 1;
+				  }
+				  
+				  //System.out.println(var);
+				  //System.out.println(methInv.toString());
 			  }
 		  }
 		  
+		  System.out.println("SUB = " + sub);
+		  
+		  int div = 0;
 		  for(PackageInfo pck : appInfo.packages){
 			  for(FileInfo file: pck.files){
 				  for(ClassInfo cls: file.classes){
@@ -186,17 +272,27 @@ public class Utils {
 					  }
 					  for(MethodInfo meth: cls.methods){
 						  //System.out.println(meth);
-						  System.out.println("  " + meth.getCls());
+						 // System.out.println("  " + meth.getCls());
+						  
+						  ArrayList<String> vars = new ArrayList<String>();
+
+						  for(String var: meth.variablesTypes.keySet()){
+							  for(ClassInfo cl: appInfo.getClasses()){
+								  if(meth.variablesTypes.get(var).equals(cl.name)){
+									  vars.add(var);
+													
+								  }
+							  }
+							  
+						  }
 						  for(MethodInvocation calledMeth: meth.calledMethods){
-							  System.out.println("     " + calledMeth.toString());
+							  //System.out.println("     " + calledMeth.toString());
 							  String call = calledMeth.toString();
 							  String[] rec = call.split("\\.");
 							  //System.out.println(rec);
 							  if(rec.length <=1 || rec[0].equals("this"));								  
-							  else {
-								  System.out.println("        Adding 1 to result");
-								  System.out.println(calledMeth);
-								  result += 1;
+							  else{
+								  if(vars.contains(rec[0])) div += 1;
 							  }
 							  
 						  }
@@ -206,8 +302,31 @@ public class Utils {
 			  }
 		  }
 		  
+		  System.out.println("DIV = " + div);
+		  
+		  result = (double)sub / (double)div;
 		  System.out.println(result);
 		  return result;
+	  }
+	  
+	  public static ArrayList<String> getFieldsAToB(String clsA, String clsB){
+		  ArrayList<String> fields = new ArrayList<String>();
+		  
+		  AppInfo appInfo = Utils.app;
+		  
+		  for(PackageInfo pck: appInfo.packages){
+			  for(FileInfo file: pck.files){
+				  for(ClassInfo cls: file.classes){
+					  if(cls.name.equals(clsA)){
+						  fields.addAll(cls.getFieldsNameByType(clsB));
+						  
+					  }
+				  }
+			  }
+		  }
+		  
+		  
+		  return fields;
 	  }
 
 	  
