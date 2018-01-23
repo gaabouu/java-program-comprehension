@@ -1,10 +1,13 @@
 package main;
 
+import java.awt.List;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Scanner;
+
+import javax.swing.SwingUtilities;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jdt.core.JavaCore;
@@ -13,6 +16,7 @@ import org.eclipse.jdt.core.dom.*;
 import org.w3c.dom.Document;
 import visitors.*;
 import appInfo.*;
+import draw.*;
 
 public class Main {
 	
@@ -41,6 +45,8 @@ public class Main {
 	    double met;
 	    boolean stop = false;
 	    Scanner sc = new Scanner(System.in);
+	    PonderedGraphPanel pondGraph = new PonderedGraphPanel(app);
+	    pondGraph.createAndShowGui();
 	    while(!stop){
 	    
 		    System.out.println("Choisissez les classes dont vous souhaitez connaitre le couplage: Classe A");
