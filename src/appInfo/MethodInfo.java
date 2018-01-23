@@ -3,6 +3,7 @@ package appInfo;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
 public class MethodInfo extends Info {
@@ -11,6 +12,7 @@ public class MethodInfo extends Info {
     public String cls;
     public ArrayList<MethodInvocation> calledMethods = new ArrayList<>();
     public HashMap<String, String> variablesTypes = new HashMap<String, String>();
+    public ArrayList<EnhancedForInfo> forLoops = new ArrayList<EnhancedForInfo>();
 
     public String toString() {
       String str = "\t\t\t\tMethod: " + this.name + ":\n";
@@ -53,6 +55,10 @@ public class MethodInfo extends Info {
     		}
     	}
     	return result;
+    }
+    
+    public ArrayList<EnhancedForInfo> getFors(){
+    	return this.forLoops;
     }
     
     public void addCouple(String _name, String _type){

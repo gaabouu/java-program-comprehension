@@ -10,7 +10,9 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -19,11 +21,14 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import appInfo.AppInfo;
 import appInfo.ClassInfo;
+import appInfo.EnhancedForInfo;
 import appInfo.FileInfo;
 import appInfo.Info;
 import appInfo.MethodInfo;
 import appInfo.MethodInvocationInfo;
 import appInfo.PackageInfo;
+import visitors.EnhancedForStatementVisitor;
+import visitors.ForStatementVisitor;
 import visitors.MethodInvocationVisitor;
 import visitors.TypeDeclarationVisitor;
 import visitors.VariableDeclarationFragmentVisitor;
@@ -79,15 +84,34 @@ public class Utils {
 	        	  clsInfo.fields.put(name, typeField);
 	          }
 	          for (MethodDeclaration meth : type.getMethods()) {
+	        	
+	        	  
+	        	  
+	        	  
 	            MethodInfo methodInfo = new MethodInfo();
 	            methodInfo.name = meth.getName().toString();
 	            methodInfo.cls = type.getName().toString();
 	            methodInfo.nbParameters = meth.parameters().size();
 	            methodInfo.nbLines = meth.getBody().toString().split("\n").length;
 	            
-	            for(MethodInvocation inv: MethodInvocationVisitor.perform(parser)) {
+	            //System.out.println("for loops of "+ meth.getName().toString());
+	            
+	            for(EnhancedForStatement f: EnhancedForStatementVisitor.perform(meth)){
+	            	EnhancedForInfo forInfo = new EnhancedForInfo();
+	            	//System.out.println(f.getParameter().toString());
+	            	forInfo.meth = meth.getName().toString();
+	            	String var = f.getParameter().toString().split(" ")[1];
+	            	String varType = f.getParameter().toString().split(" ")[0];
+	            	//System.out.println("Variable declarations in this block: " + var + " of type " + varType);
+	            	methodInfo.variablesTypes.put(var, varType);
 	            	
-	              //System.out.println("   " + inv);
+	            	
+	        		//methodInfo.forLoops.add(f);
+	        	}
+	            
+	            for(MethodInvocation inv: MethodInvocationVisitor.perform(meth)) {
+	            	
+	              //System.out.println(meth.getName().toString() + "   " + inv.toString());
 	              methodInfo.calledMethods.add(inv);
 	            }
 	           // System.out.println("   Les variables de la méthode: " + meth.getName());
@@ -212,7 +236,7 @@ public class Utils {
 			  return -1;
 		  }
 		  
-		  System.out.println("\nMéthodes appelées par " + clsA);
+		  //System.out.println("\nMéthodes appelées par " + clsA);
 		  for(MethodInfo meth: methsA){
 			  ArrayList<String> varsAToB = new ArrayList<String>();
 			  varsAToB.addAll(meth.getVarsNameByType(clsB));
@@ -221,14 +245,21 @@ public class Utils {
 			  //System.out.println("et champs: \n" + fieldsAOfTypeB);
 			  for(MethodInvocation methInv: meth.calledMethods){
 				 // if(methInv.toString().matches(".")){
+				 // System.out.println(methInv.toString());
 					  String var = methInv.toString();
+					  
 					  String[] parts = var.split("\\.");
 					  var = parts[0];
-					  for(String varAB: varsAToB){
-						  if(var.equals(varAB)) sub += 1;
-					  }
-					  for(String fieldAB: fieldsAOfTypeB){
-						  if(var.equals(fieldAB)) sub += 1;
+					  System.out.println(meth.name + ": " + methInv.toString() + " -> " + var + " =? " + clsB);
+					  if(var.equals(clsB)) sub += 1;
+					  else {
+						  for(String varAB: varsAToB){
+							  if(var.equals(varAB)) sub += 1;
+							  
+						  }
+						  for(String fieldAB: fieldsAOfTypeB){
+							  if(var.equals(fieldAB)) sub += 1;
+						  }
 					  }
 					  
 					  //System.out.println(var);
@@ -237,7 +268,7 @@ public class Utils {
 				 // }
 			  }
 		  }
-		  System.out.println("\nMéthodes appelées par " + clsB);
+		  //System.out.println("\nMéthodes appelées par " + clsB);
 
 		  for(MethodInfo meth: methsB){
 			  ArrayList<String> varsBToA = new ArrayList<String>();
@@ -249,11 +280,15 @@ public class Utils {
 				  String var = methInv.toString();
 				  String[] parts = var.split("\\.");
 				  var = parts[0];
-				  for(String varBA: varsBToA){
-					  if(var.equals(varBA)) sub += 1;
-				  }
-				  for(String fieldBA: fieldsBOfTypeA){
-					  if(var.equals(fieldBA)) sub += 1;
+				  if(var.equals(clsA)) sub += 1;
+				  else{
+					  for(String varBA: varsBToA){
+						  if(var.equals(varBA)) sub += 1;
+						 
+					  }
+					  for(String fieldBA: fieldsBOfTypeA){
+						  if(var.equals(fieldBA)) sub += 1;
+					  }
 				  }
 				  
 				  //System.out.println(var);

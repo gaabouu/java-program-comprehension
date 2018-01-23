@@ -50,7 +50,7 @@ public class Main {
 		    
 		    met = Utils.getMetrik(classA, classB);
 		    
-		    if(!(met == -1)) stop = true;
+		    //if(!(met == -1)) stop = true;
 	    }
 
 	    

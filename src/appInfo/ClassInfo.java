@@ -50,7 +50,7 @@ public class ClassInfo extends Info {
     			nameSubType = nameSubType.substring(0, nameSubType.length() - 1);
     			//System.out.println("ICIIIIIIIIIIIII " + nameSubType);
     			if(nameSubType.equals(type))
-    			result.add(nameSubType);
+    			result.add(name);
     		}
     	}
     	return result;
