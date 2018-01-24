@@ -19,45 +19,45 @@ import appInfo.*;
 import draw.*;
 
 public class Main {
-	
-	public static final String projectPath = "./";
-	public static final String projectSourcePath = projectPath + "./src";
-	public static final String jrePath = "/usr/lib/jvm/oracle-java8-jre-amd64/lib/rt.jar";
-	
-	public static AppInfo app;
-	
-	public static void main(String[] args) throws IOException {
 
-	    // read java files
-	    final File root = new File(projectSourcePath);
+    public static final String projectPath = "./";
+    public static final String projectSourcePath = projectPath + "./src";
+    public static final String jrePath = "/usr/lib/jvm/oracle-java8-jre-amd64/lib/rt.jar";
 
-	    //print nbr of class, nbr of line, nbr of methods for the app
-	   // app = (AppInfo) getInfo(root);
-	    
-	    Utils.root = root;
-	    Utils.projectSourcePath = projectSourcePath;
-		Utils.jrePath = jrePath;
-	    
-	    app = (AppInfo) Utils.getInfo(Utils.root);
-	    
-	    Utils.app = app;
-	    
-	    double met;
-	    boolean stop = false;
-	    Scanner sc = new Scanner(System.in);
-	    PonderedGraphPanel pondGraph = new PonderedGraphPanel(app);
-	    pondGraph.createAndShowGui();
-	    while(!stop){
-	    
-		    System.out.println("Choisissez les classes dont vous souhaitez connaitre le couplage: Classe A");
-		    String classA = sc.nextLine();
-		    System.out.println("Classe B");
-		    String classB = sc.nextLine();
-		    
-		    met = Utils.getMetrik(classA, classB);
-		    
-		    //if(!(met == -1)) stop = true;
-	    }
+    public static AppInfo app;
+
+    public static void main(String[] args) throws IOException {
+
+        // read java files
+        final File root = new File(projectSourcePath);
+
+        //print nbr of class, nbr of line, nbr of methods for the app
+        // app = (AppInfo) getInfo(root);
+
+        Utils.root = root;
+        Utils.projectSourcePath = projectSourcePath;
+        Utils.jrePath = jrePath;
+
+        app = (AppInfo) Utils.getInfo(Utils.root);
+
+        Utils.app = app;
+
+        double met;
+        boolean stop = false;
+        Scanner sc = new Scanner(System.in);
+        PonderedGraphPanel pondGraph = new PonderedGraphPanel(app);
+        pondGraph.createAndShowGui();
+        while (!stop) {
+
+            System.out.println("Choisissez les classes dont vous souhaitez connaitre le couplage: Classe A");
+            String classA = sc.nextLine();
+            System.out.println("Classe B");
+            String classB = sc.nextLine();
+
+            met = Utils.getMetrik(classA, classB);
+
+            //if(!(met == -1)) stop = true;
+        }
 
 	    
 /*
@@ -160,5 +160,5 @@ public class Main {
 	  }*/
 
 
-	}	
+    }
 }

@@ -34,7 +34,7 @@ public class PonderedGraphPanel extends JPanel {
     private int numberYDivisions = 10;
     private AppInfo appInfo;
     private List<ClassInfo> classes = new ArrayList<ClassInfo>();
-    
+
 
     public PonderedGraphPanel(AppInfo _appInfo) {
         this.classes.addAll(_appInfo.getClasses());
@@ -44,9 +44,8 @@ public class PonderedGraphPanel extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        
-        
-        
+
+
         Graphics2D g2 = (Graphics2D) g;
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
@@ -111,7 +110,7 @@ public class PonderedGraphPanel extends JPanel {
         Stroke oldStroke = g2.getStroke();
         g2.setColor(lineColor);
         g2.setStroke(GRAPH_STROKE);
-        
+
         for (int i = 0; i < graphPoints.size() - 1; i++) {
             int x1 = graphPoints.get(i).x;
             int y1 = graphPoints.get(i).y;
@@ -131,7 +130,7 @@ public class PonderedGraphPanel extends JPanel {
         }
     }
 
-//    @Override
+    //    @Override
 //    public Dimension getPreferredSize() {
 //        return new Dimension(width, heigth);
 //    }
@@ -180,6 +179,6 @@ public class PonderedGraphPanel extends JPanel {
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }
-    
-   
+
+
 }
