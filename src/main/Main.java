@@ -45,19 +45,26 @@ public class Main {
         double met;
         boolean stop = false;
         Scanner sc = new Scanner(System.in);
-        PonderedGraphPanel pondGraph = new PonderedGraphPanel(app);
-        pondGraph.createAndShowGui();
-        while (!stop) {
+        System.out.println("################## GRAPHE DE COUPLAGE PONDERE #####################");
+        Utils.drawPonderedGraph();
+        System.out.println("################### GRAPHE DE CLUSTERING ########################");
+        for (Cluster cls : Utils.clusteringHierarchique()) {
+            System.out.println(cls);
+        }
+        //PonderedGraphPanel pondGraph = new PonderedGraphPanel(app);
+        //pondGraph.createAndShowGui();
+        //while (!stop) {
 
-            System.out.println("Choisissez les classes dont vous souhaitez connaitre le couplage: Classe A");
+            /*System.out.println("Choisissez les classes dont vous souhaitez connaitre le couplage: Classe A");
             String classA = sc.nextLine();
             System.out.println("Classe B");
             String classB = sc.nextLine();
+*/
+        //met = Utils.getMetrik(classA, classB);
 
-            met = Utils.getMetrik(classA, classB);
 
-            //if(!(met == -1)) stop = true;
-        }
+        //if(!(met == -1)) stop = true;
+        // }
 
 	    
 /*

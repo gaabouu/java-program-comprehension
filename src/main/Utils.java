@@ -202,6 +202,16 @@ public class Utils {
         return methods;
     }
 
+    public static double getMetrik(Cluster clsA, Cluster clsB) {
+        double metrik = 0;
+        for (ClassInfo cls1 : clsA.classes) {
+            for (ClassInfo cls2 : clsB.classes) {
+                metrik += getMetrik(cls1.name, cls2.name);
+            }
+        }
+        return metrik;
+    }
+
     public static double getMetrik(String clsA, String clsB) {
         double result = 0;
 
@@ -214,7 +224,7 @@ public class Utils {
 
         int sub = 0;
 
-        System.out.println("Calcul du couplage entre " + clsA + " et " + clsB + "...");
+        // System.out.println("Calcul du couplage entre " + clsA + " et " + clsB + "...");
         for (PackageInfo pck : appInfo.packages) {
             for (FileInfo file : pck.files) {
                 for (ClassInfo cls : file.classes) {
@@ -247,7 +257,7 @@ public class Utils {
 
                 String[] parts = var.split("\\.");
                 var = parts[0];
-                System.out.println(meth.name + ": " + methInv.toString() + " -> " + var + " =? " + clsB);
+                // System.out.println(meth.name + ": " + methInv.toString() + " -> " + var + " =? " + clsB);
                 if (var.equals(clsB)) sub += 1;
                 else {
                     for (String varAB : varsAToB) {
@@ -293,7 +303,7 @@ public class Utils {
             }
         }
 
-        System.out.println("SUB = " + sub);
+        // System.out.println("SUB = " + sub);
 
         int div = 0;
         for (PackageInfo pck : appInfo.packages) {
@@ -334,10 +344,10 @@ public class Utils {
             }
         }
 
-        System.out.println("DIV = " + div);
+        //System.out.println("DIV = " + div);
 
         result = (double) sub / (double) div;
-        System.out.println(result);
+        //System.out.println(result);
         return result;
     }
 
@@ -359,6 +369,54 @@ public class Utils {
 
 
         return fields;
+    }
+
+    public static void drawPonderedGraph() {
+        ArrayList<ClassInfo> clss = app.getClasses();
+        //System.out.println(clss.size());
+        for (int i = 0; i < clss.size() - 1; i++) {
+            for (int j = i + 1; j < clss.size(); j++) {
+                double met = getMetrik(clss.get(i).name, clss.get(j).name);
+                if (met != 0) {
+                    System.out.println(clss.get(i).name + " | " + clss.get(j).name + " -> " + met);
+                }
+            }
+
+        }
+    }
+
+    public static ArrayList<Cluster> clusteringHierarchique() {
+        ArrayList<Cluster> result = new ArrayList<Cluster>();
+        ArrayList<Cluster> clusters = new ArrayList<Cluster>();
+        ArrayList<ClassInfo> clss = app.getClasses();
+
+        for (ClassInfo cls : clss) {
+            clusters.add(new Cluster(cls));
+        }
+
+        while (clusters.size() > 1) {
+            double max = 0;
+            Cluster clsA = clusters.get(0);
+            Cluster clsB = clusters.get(1);
+
+            for (int i = 0; i < clusters.size() - 1; i++) {
+                for (int j = i + 1; j < clusters.size(); j++) {
+                    double metrik = getMetrik(clusters.get(i), clusters.get(j));
+                    if (metrik > max) {
+                        max = metrik;
+                        clsA = clusters.get(i);
+                        clsB = clusters.get(j);
+                    }
+                }
+            }
+
+            Cluster newCls = new Cluster(clsA, clsB);
+            result.add(newCls);
+            clusters.remove(clsA);
+            clusters.remove(clsB);
+            clusters.add(newCls);
+        }
+        return result;
     }
 
 	  
