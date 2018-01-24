@@ -4,7 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Queue;
+import java.util.Stack;
 
+import com.sun.jmx.remote.internal.ArrayQueue;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
@@ -419,38 +422,24 @@ public class Utils {
         return result;
     }
 
-	  
-	  
-	  /*
-	  public static void tenPercentClassGreaterMethodNumber(){
-		double percent = (double) app.getNbClasses() * 0.1;
-	    int i = 0;
-	    ArrayList<ClassInfo> classesOrderedByMethods = sortClassesByMethodNumber(app.getClasses());
-	    ArrayList<ClassInfo> topClassesByMethods = new ArrayList<>();
-	    while (i < percent - 1) {
-	      topClassesByMethods.add(classesOrderedByMethods.get(i));
-	      i++;
-	    }
-	    System.out.print("10% de classes avec le plus de méthodes: ");
-	    for (ClassInfo cls : topClassesByMethods) {
-	      System.out.print(cls.name + " | ");
-	    }
-	    System.out.println();
-	  }
-	  
-	  public static void tenPercentClassGreaterAttributeNumber(){
-		int i = 0;
-		double percent = (double) app.getNbClasses() * 0.1;
-	    ArrayList<ClassInfo> classesOrderedByFields = Utils.sortClassesByFieldsNumber(app.getClasses());
-	    ArrayList<ClassInfo> topClassesByFields = new ArrayList<>();
-	    while (i < percent - 1) {
-	      topClassesByFields.add(classesOrderedByFields.get(i));
-	      i++;
-	    }
-	    System.out.print("10% de classes avec le plus d'attributs: ");
-	    for (ClassInfo cls : topClassesByFields) {
-	      System.out.print(cls.name + " | ");
-	    }
-	    System.out.println();
-	  }*/
+    public static ArrayList<Cluster> selectionClusters(Cluster cluster) {
+        Stack<Cluster> composants = new Stack<>();
+        ArrayList<Cluster> result = new ArrayList<>();
+        composants.push(cluster);
+
+        while (!(composants.empty())) {
+            Cluster pere = composants.pop();
+            Cluster filsG = pere.filsG;
+            Cluster filsD = pere.filsD;
+            if (filsG == null || filsD == null) {
+                result.add(pere);
+            } else if (pere.metrik > (filsG.metrik + filsD.metrik) / 2.) {
+                result.add(pere);
+            } else {
+                composants.push(filsG);
+                composants.push(filsD);
+            }
+        }
+        return result;
+    }
 }

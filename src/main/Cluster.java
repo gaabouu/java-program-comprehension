@@ -5,6 +5,8 @@ import appInfo.ClassInfo;
 import java.util.ArrayList;
 
 public class Cluster {
+    private static int counter = 0;
+
     public ArrayList<ClassInfo> classes = new ArrayList<ClassInfo>();
     public Cluster filsG;
     public Cluster filsD;
@@ -27,11 +29,24 @@ public class Cluster {
         }
         this.filsG = cls1;
         this.filsD = cls2;
-        this.name = cls1.name + " | " + cls2.name;
+        this.name = "C" + counter;
+        counter++;
         this.metrik = Utils.getMetrik(filsG, filsD);
     }
 
     public String toString() {
-        return this.name + " < " + this.filsG.name + " > " + filsD.name + " ====> Metrique = " + this.metrik;
+        String str = this.name + "\n";
+        str += "Liste des classe: ";
+        for (ClassInfo cls : this.classes) {
+            str += cls.name + " | ";
+        }
+        if (this.filsG != null && this.filsD != null) {
+            str += "\n";
+            str += "Fils Gauche: " + this.filsG.name + "\n";
+            str += "Fils Droit: " + this.filsD.name + "\n";
+            str += "Metrique: " + this.metrik;
+        }
+        str += "\n";
+        return str;
     }
 }
